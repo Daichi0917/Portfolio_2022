@@ -10,6 +10,7 @@
             <%= message %>
           <% end %>
         <% end %>
+
         <%= form_with model: @post_image, local:true do |f| %>
           <%= f.attachment_field :image, class: "w-100" %>
           <div class="input-group mb-3 mt-4">

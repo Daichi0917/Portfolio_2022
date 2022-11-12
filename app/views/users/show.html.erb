@@ -1,8 +1,12 @@
 <div class="profile-container">
   <h3 class="profile-name"><%= @user.name %></h3>
-  <%= attachment_image_tag @user, :profile_image, :fill, 100, 100, format: 'jpeg', fallback: "no_image.jpg" %>
+  <%= attachment_image_tag @user, :profile_image, :fill, 100, 100, fallback: "no_image.jpg" %>
+  <br>
+  <br>
   <% if @user.id == current_user.id %>
-    <p><%= link_to "プロフィール編集", edit_user_path(@user) %></p>
+    <p><%= link_to "プロフィール編集", edit_user_path(@user), class:"btn btn-info" %></p>
   <% end %>
+
 </div>
+
 <%= render 'post_images/list', post_images: @post_images %>

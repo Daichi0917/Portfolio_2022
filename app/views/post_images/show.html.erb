@@ -1,21 +1,32 @@
+
 <div>
   <%= attachment_image_tag @post_image, :image %>
-  <p>ショップ名：<%= @post_image.shop_name %></p>
+  <p>投稿タイトル：<%= @post_image.shop_name %></p>
   <p>説明：<%= @post_image.caption %></p>
   <p>ユーザーネーム：<%= @post_image.user.name %></p>
   <p>投稿日時：<%= @post_image.created_at.strftime('%Y/%m/%d') %></p>
-  <% if @post_image.user == current_user %>
-    <%= link_to "削除", post_image_path(@post_image), method: :delete %>
+
+  <% if @post_image.user == current_user || current_user.admin?%>
+    <% if @post_image.user == current_user %>
+      <%= link_to "投稿編集", edit_post_image_path(@post_image),class: "btn btn-primary" %>
+    <% end %>
+    <br>
+    <br>
+    <%= button_to "投稿削除", post_image_path(@post_image), method: :delete,
+      data: { confirm: "削除してよろしいですか？" },class: "btn btn-danger" %>
   <% end %>
+    <br>
+    <br>
+    <br>
   <% if @post_image.favorited_by?(current_user) %>
     <p>
-      <%= link_to post_image_favorites_path(@post_image), method: :delete do %>
+      <%= button_to post_image_favorites_path(@post_image), {method: :delete} do %>
         ♥<%= @post_image.favorites.count %> いいね
       <% end %>
     </p>
     <% else %>
     <p>
-      <%= link_to post_image_favorites_path(@post_image), method: :post do %>
+      <%= button_to post_image_favorites_path(@post_image), {method: :post} do %>
         ♡<%= @post_image.favorites.count %> いいね
       <% end %>
     </p>
@@ -25,19 +36,76 @@
 <div>
 <p>コメント件数：<%= @post_image.post_comments.count %></p>
 <% @post_image.post_comments.each do |post_comment| %>
-  <p><%= image_tag('sample-author1.jpg') %></p>
+  <%# <%= attachment_image_tag post_comment.user, :profile_image, :fill, 60, 60, fallback: "no_image.jpg" %>
+   <br>
   <%= post_comment.user.name %>
-  <%= post_comment.created_at.strftime('%Y/%m/%d') %><%= post_comment.comment %>
-  <% if post_comment.user == current_user %>
+  <%= post_comment.created_at.strftime('%Y/%m/%d') %>
+   <br>
+  <%= post_comment.comment %>
+  <% if post_comment.user == current_user || current_user.admin? %>
   <div>
-    <%= link_to "削除", post_image_post_comment_path(post_comment.post_image, post_comment), method: :delete %>
+    <%= button_to "コメント削除", post_image_post_comment_path(post_comment.post_image, post_comment), method: :delete %>
   </div>
   <% end %>
 <% end %>
 </div>
+<br>
+<br>
 <div>
 <%= form_with(model:[@post_image, @post_comment], local: true) do |f| %>
   <%= f.text_area :comment, rows:'5',placeholder: "コメントをここに" %>
   <%= f.submit "送信する" %>
 <% end %>
 </div>
+<br>
+<br>
+<h2>googlemap</h2>
+<!-- 地名入力用のinputを追加 -->
+<input id="address" type="textbox" value="Sydney, NSW">
+
+<!-- buttonをクリックしたらcodeAddressを実行-->
+<input type="button" value="Encode" onclick="codeAddress()">
+<div id='map'></div>
+
+<style>
+#map{
+  height: 400px;
+}
+</style>
+
+<script>
+let map
+let geocoder
+
+function initMap(){
+
+  geocoder = new google.maps.Geocoder()
+
+  map = new google.maps.Map(document.getElementById('map'), {
+  center: {lat: -34.397, lng: 150.644},
+  zoom: 8
+  });
+}
+
+function codeAddress(){
+  // 入力を取得
+  let inputAddress = document.getElementById('address').value;
+
+  // geocodingしたあとmapを移動
+  geocoder.geocode( { 'address': inputAddress}, function(results, status) {
+    if (status == 'OK') {
+  // map.setCenterで地図が移動
+      map.setCenter(results[0].geometry.location);
+
+// google.maps.MarkerでGoogleMap上の指定位置にマーカが立つ
+      var marker = new google.maps.Marker({
+          map: map,
+          position: results[0].geometry.location
+      });
+    } else {
+      alert('Geocode was not successful for the following reason: ' + status);
+    }
+  });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDQd-BmT6LV9ng8vju_mdHxIxsz_maU_3w&callback=initMap" async defer></script>
